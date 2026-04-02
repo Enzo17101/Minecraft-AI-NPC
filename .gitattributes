@@ -1,0 +1,14 @@
+# Default behavior: normalize line endings to LF in the repo
+* text=auto
+
+# Force LF for shell scripts (CRITICAL for Linux execution)
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Force CRLF for Windows batch scripts
+gradlew.bat text eol=crlf
+*.bat text eol=crlf
+
+# Optional: Force LF for source code for consistency
+*.java text eol=lf
+*.py text eol=lf

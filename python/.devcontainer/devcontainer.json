@@ -1,0 +1,16 @@
+{
+  "name": "NPC AI Backend",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "backend-npc-ai",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylance",
+        "charliermarsh.ruff"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}

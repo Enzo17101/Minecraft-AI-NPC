@@ -1,0 +1,9 @@
+# Gradle artifacts
+build/
+.gradle/
+
+# Compiled Java class files
+*.class
+
+# Log files
+*.log

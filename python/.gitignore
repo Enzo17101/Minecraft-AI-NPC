@@ -1,0 +1,17 @@
+# Environments
+.env
+.venv/
+env/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Docker cache and volumes
+models_cache/
+pgdata/
+redisdata/
+
+# Ruff cache
+.ruff_cache/
