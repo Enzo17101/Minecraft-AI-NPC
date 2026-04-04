@@ -1,6 +1,11 @@
 name: Minecraft-AI-NPC
 version: '$version'
 
-main: com.MinecraftAINPC.MinecraftAINPC
+main: io.github.enzo17101.minecraftainpc.MinecraftAINPC
 api-version: '1.21.11'
 load: POSTWORLD
+
+commands:
+  talk:
+    description: Send a message to the focused NPC
+    usage: /talk <message>

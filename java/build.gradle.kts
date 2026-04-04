@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     id("xyz.jpenilla.run-paper") version "3.0.2"
+    id("io.github.goooler.shadow") version "8.1.8"
 }
 
 repositories {
@@ -9,7 +10,16 @@ repositories {
 }
 
 dependencies {
+    // Spigot/Paper API
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+
+    // Lombok for boilerplate code reduction
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+
+    // WebSockets and JSON serialization (will be shaded)
+    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 java {
@@ -17,6 +27,10 @@ java {
 }
 
 tasks {
+    build {
+        dependsOn(shadowJar)
+    }
+
     runServer {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.

@@ -7,3 +7,5 @@ build/
 
 # Log files
 *.log
+/run/
+/gradle/
