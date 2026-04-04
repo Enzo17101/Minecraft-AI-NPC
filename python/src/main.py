@@ -2,8 +2,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 import logging
 
-from schemas import IncomingPayload, OutgoingPayload
-from connection_manager import ConnectionManager
+from src.schemas import IncomingPayload, OutgoingPayload
+from src.connection_manager import ConnectionManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
