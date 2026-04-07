@@ -84,7 +84,7 @@ public class AiWebSocketClient extends WebSocketClient {
             return;
         }
 
-        Component npcMsg = mm.deserialize("<gold>[NPC AI]</gold> <white>" + response.getMessage() + "</white>");
+        Component npcMsg = mm.deserialize("<gold>[NPC]</gold> <white>" + response.getMessage() + "</white>");
         Bukkit.getServer().broadcast(npcMsg);
 
         // Command execution stub (will be fully implemented in Sprint 4)

@@ -1,5 +1,7 @@
 package io.github.enzo17101.minecraftainpc;
 
+import io.github.enzo17101.minecraftainpc.commands.TalkCommand;
+import io.github.enzo17101.minecraftainpc.listeners.NpcInteractionListener;
 import io.github.enzo17101.minecraftainpc.network.AiWebSocketClient;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,12 +16,18 @@ public class MinecraftAINPC extends JavaPlugin {
     public void onEnable() {
         getLogger().info("Initializing AI NPC Orchestrator...");
         connectToBackend();
+
+        // Register Command and Listeners
+        if (getCommand("talk") != null) {
+            getCommand("talk").setExecutor(new TalkCommand(this));
+        }
+        getServer().getPluginManager().registerEvents(new NpcInteractionListener(this), this);
     }
 
     @Override
     public void onDisable() {
         getLogger().info("Shutting down AI NPC Orchestrator...");
-        if (webSocketClient != null && !webSocketClient.isClosed()) {
+        if (webSocketClient != null && !webSocketClient.isOpen()) {
             webSocketClient.close();
         }
     }

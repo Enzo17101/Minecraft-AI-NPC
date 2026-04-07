@@ -33,7 +33,8 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                 incoming = IncomingPayload.model_validate_json(raw_data)
                 
                 logger.info(f"Received message from player {incoming.player.player_name} to NPC {incoming.npc.npc_name}")
-                
+                logger.info(f"[PAYLOAD] {incoming}")
+
                 # Echo logic for Sprint 1
                 response_text = f"[ECHO] {incoming.npc.npc_name} heard: {incoming.player.message}"
                 
@@ -43,6 +44,7 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                     action_intent="ECHO",
                     commands=[]
                 )
+
                 
                 await manager.send_payload(outgoing.model_dump_json(), websocket)
                 
