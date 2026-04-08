@@ -1,17 +1,30 @@
+import os
 import logging
 from typing import cast
 from litellm import acompletion, ModelResponse
+
+# Mute vLLM logs before importing it
+os.environ["VLLM_LOGGING_LEVEL"] = "WARNING"
+os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
+
+# Mute the standard Python loggers used by vLLM dependencies
+logging.getLogger("vllm").setLevel(logging.WARNING)
+logging.getLogger("torch").setLevel(logging.WARNING)
+logging.getLogger("transformers").setLevel(logging.WARNING)
+
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
 
 logger = logging.getLogger(__name__)
 
+
+
 # Cloud Model Configuration (LiteLLM)
-CLOUD_MODEL_NAME = "gemini/gemini-flash-lite-latest"
+CLOUD_MODEL_NAME = "groq/llama-3.3-70b-versatile"
 
 async def generate_cloud_response(system_prompt: str, user_prompt: str) -> str:
     """
-    Calls the Google Gemini API asynchronously via LiteLLM.
+    Calls the API asynchronously via LiteLLM.
     """
     try:
         raw_response = await acompletion(
@@ -20,7 +33,7 @@ async def generate_cloud_response(system_prompt: str, user_prompt: str) -> str:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=1.0,
+            temperature=0.7,
             max_tokens=150
         )
 

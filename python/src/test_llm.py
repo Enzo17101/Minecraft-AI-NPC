@@ -6,7 +6,7 @@ from ai_engine import generate_cloud_response, init_vllm_engine
 
 import time
 
-# Load .env variables (GEMINI_API_KEY, HF_TOKEN)
+# Load .env variables (MODEL_API_KEY, HF_TOKEN)
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,18 +14,20 @@ logger = logging.getLogger(__name__)
 async def run_tests():
     logger.info("--- Starting AI Engines Test ---")
 
-    # Test Cloud Engine (LiteLLM + Gemini)
-    logger.info("Testing Cloud Model (Gemini)...")
+    for i in range(3):
 
-    start = time.time()
+        # Test Cloud Engine (Cloud Model)
+        logger.info("Testing Cloud Model...")
 
-    cloud_result = await generate_cloud_response(
-        system_prompt="You are a helpful assistant.",
-        user_prompt="Say the word 'Banana' and nothing else."
-    )
-    end = time.time()
-    print("gemini response time : ", end - start)
-    logger.info(f"Cloud Response: {cloud_result.strip()}")
+        start = time.time()
+
+        cloud_result = await generate_cloud_response(
+            system_prompt="You are a helpful assistant.",
+            user_prompt=f"Say 'Banana {i} !' and nothing else."
+        )
+        end = time.time()
+        print("gemini response time : ", end - start)
+        logger.info(f"Cloud Response: {cloud_result.strip()}")
 
     # Test Local Engine (vLLM + Llama 3 AWQ)
     logger.info("Testing Local Model (vLLM)... (This will download ~5GB if first time)")
