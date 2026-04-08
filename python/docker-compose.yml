@@ -3,7 +3,7 @@ services:
     build: .
     container_name: backend_npc_ai
     env_file:
-      - .env.example
+      - .env
     ports:
       - "8000:8000"
     volumes:
