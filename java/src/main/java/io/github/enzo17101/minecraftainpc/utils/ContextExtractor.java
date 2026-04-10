@@ -40,6 +40,20 @@ public class ContextExtractor {
 
         double npcHealth = (npc instanceof LivingEntity livingEntity) ? livingEntity.getHealth() : 20.0;
 
+        List<TradeItem> simulatedInventory = new ArrayList<>();
+        simulatedInventory.add(TradeItem.builder().item("apple").stock(18).price(6.0).build());
+
+        TradeCapability tradeCapability = TradeCapability.builder()
+                .isMerchant(true)
+                .inventory(simulatedInventory)
+                .build();
+
+        Capabilities npcCapabilities = Capabilities.builder()
+                .availableQuests(new ArrayList<>())
+                .trade(tradeCapability)
+                .canAssist(false)
+                .build();
+
         NpcData npcData = NpcData.builder()
                 .npcUuid(npc.getUniqueId().toString())
                 .npcName(npc.getName().isEmpty()? npc.getName() : npc.getType().name())
@@ -49,27 +63,14 @@ public class ContextExtractor {
                         .y(npc.getLocation().getY())
                         .z(npc.getLocation().getZ())
                         .build())
+                .capabilities(npcCapabilities)
                 .build();
 
-        List<TradeItem> simulatedInventory = new ArrayList<>();
-        simulatedInventory.add(TradeItem.builder().item("apple").stock(18).price(6.0).build());
-
-        TradeCapability tradeCapability = TradeCapability.builder()
-                .isMerchant(true)
-                .inventory(simulatedInventory)
-                .build();
-
-        Capabilities capabilities = Capabilities.builder()
-                .availableQuests(new ArrayList<>())
-                .trade(tradeCapability)
-                .canAssist(false)
-                .build();
 
         return IncomingPayload.builder()
                 .world(worldData)
                 .player(playerData)
                 .npc(npcData)
-                .capabilities(capabilities)
                 .build();
     }
 }

@@ -10,4 +10,5 @@ public class NpcData {
     private String npcName;
     private double npcHealth;
     private LocationData npcLocation;
+    private Capabilities capabilities;
 }

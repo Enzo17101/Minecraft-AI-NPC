@@ -56,6 +56,7 @@ async def websocket_chat_endpoint(websocket: WebSocket):
             
             try:
                 incoming = IncomingPayload.model_validate_json(raw_data)
+                logger.info(f"[INCOMING PAYLOAD] {incoming}")
                 logger.info(f"Received message from {incoming.player.player_name} to {incoming.npc.npc_name}")
                 
                 # Offload processing to the local intent engine and cloud roleplay model

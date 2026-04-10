@@ -26,10 +26,16 @@ public class MinecraftAINPC extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("Shutting down AI NPC Orchestrator...");
-        if (webSocketClient != null && !webSocketClient.isOpen()) {
+        // Clean close websocket connexion
+        if (webSocketClient != null && !webSocketClient.isClosed()) {
+            getLogger().info("Fermeture de la connexion WebSocket IA...");
             webSocketClient.close();
         }
+
+        // Kill all waiting tasks
+        getServer().getScheduler().cancelTasks(this);
+
+        getLogger().info("Plugin MinecraftAINPC désactivé avec succès.");
     }
 
     private void connectToBackend() {

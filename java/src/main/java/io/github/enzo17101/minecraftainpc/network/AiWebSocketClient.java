@@ -76,6 +76,8 @@ public class AiWebSocketClient extends WebSocketClient {
         if (this.isOpen()) {
             String json = gson.toJson(payload);
             this.send(json);
+
+            plugin.getLogger().log(Level.INFO, "[PAYLOAD] " + json);
             plugin.getLogger().info("[WebSocket] Sent request to AI Backend.");
         } else {
             plugin.getLogger().warning("[WebSocket] Cannot send request: Connection is closed.");
