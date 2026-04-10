@@ -20,12 +20,33 @@ class PlayerData(BaseModel):
     held_item: str
     economy_balance: float
     player_health: float
+    player_max_health: float
+
+class QuestCapability(BaseModel):
+    id: str
+    lore_description: str
+    status: str
+
+class TradeItem(BaseModel):
+    item: str
+    stock: int
+    price: float
+
+class TradeCapability(BaseModel):
+    is_merchant: bool
+    inventory: list[TradeItem] = []
+
+class Capabilities(BaseModel):
+    available_quests: list[QuestCapability] = []
+    trade: Optional[TradeCapability] = None
+    can_assist: bool = False
 
 class NPCData(BaseModel):
     npc_uuid: str
     npc_name: str
     npc_health: float
     npc_location: LocationData
+    capabilites: Capabilities
 
 class IncomingPayload(BaseModel):
     world: WorldData

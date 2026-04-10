@@ -1,0 +1,19 @@
+{
+    "capabilities": {
+        "available_quests": [
+            {
+                "id": "the_great_mage",
+                "lore_description": "Aider le mage à retrouver son grimoire dans la tour",
+                "status": "NOT_STARTED"
+            }
+        ],
+        "trade": {
+            "is_merchant": true,
+            "inventory": [
+                {"item": "apple", "stock": 18, "price": 6},
+                {"item": "meat", "stock": 5, "price": 22}
+            ]
+        },
+        "can_assist": false
+    }
+}
