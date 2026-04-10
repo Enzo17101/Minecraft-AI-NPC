@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from schemas import IncomingPayload, WorldData, PlayerData, NPCData, LocationData
+from schemas import IncomingPayload, WorldData, PlayerData, NPCData, LocationData, Capabilities, TradeCapability, TradeItem
 from intent_engine import IntentResult
 from rp_engine import generate_npc_dialogue
 from dotenv import load_dotenv
@@ -27,7 +27,13 @@ def create_mock_payload(message: str, health: float, item: str, weather: str, ma
         ),
         npc=NPCData(
             npc_uuid="456", npc_name="Eldon", npc_health=20.0,
-            npc_location=LocationData(x=0, y=0, z=0)
+            npc_location=LocationData(x=0, y=0, z=0),
+            capabilities=Capabilities(
+                trade=TradeCapability(
+                    is_merchant=True,
+                    inventory=[TradeItem(item="apple", stock=18, price=6.0)]
+                )
+            )
         )
     )
 

@@ -46,7 +46,7 @@ class NPCData(BaseModel):
     npc_name: str
     npc_health: float
     npc_location: LocationData
-    capabilites: Capabilities
+    capabilities: Capabilities
 
 class IncomingPayload(BaseModel):
     world: WorldData
@@ -57,4 +57,3 @@ class OutgoingPayload(BaseModel):
     status: str
     message: str
     action_intent: Optional[str] = None
-    commands: List[str] = []
