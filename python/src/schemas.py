@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel
 
 class LocationData(BaseModel):
@@ -54,6 +54,7 @@ class IncomingPayload(BaseModel):
     npc: NPCData
 
 class OutgoingPayload(BaseModel):
+    target_player_uuid: Optional[str] = None
     status: str
     message: str
     action_intent: Optional[str] = None

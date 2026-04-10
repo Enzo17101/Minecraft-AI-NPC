@@ -4,7 +4,10 @@ import io.github.enzo17101.minecraftainpc.MinecraftAINPC;
 import io.github.enzo17101.minecraftainpc.dto.IncomingPayload;
 import io.github.enzo17101.minecraftainpc.dto.OutgoingPayload;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.JsonSyntaxException;
+import io.github.enzo17101.minecraftainpc.utils.ActionDispatcher;
 import org.bukkit.Bukkit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -21,7 +24,10 @@ public class AiWebSocketClient extends WebSocketClient {
     public AiWebSocketClient(URI serverUri, MinecraftAINPC plugin) {
         super(serverUri);
         this.plugin = plugin;
-        this.gson = new Gson();
+
+        this.gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
     }
 
     @Override
@@ -37,7 +43,14 @@ public class AiWebSocketClient extends WebSocketClient {
             OutgoingPayload response = gson.fromJson(message, OutgoingPayload.class);
 
             // Dispatch the logic back to the Bukkit Main Thread to safely interact with the game
-            Bukkit.getScheduler().runTask(plugin, () -> handleAiResponse(response));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if ("ERROR".equals(response.getStatus())) {
+                    plugin.getLogger().warning("[AI Backend Error] " + response.getMessage());
+                    return;
+                }
+
+                ActionDispatcher.dispatch(response);
+            });
 
         } catch (JsonSyntaxException e) {
             plugin.getLogger().log(Level.SEVERE, "[WebSocket] Failed to parse JSON from backend: " + message, e);
@@ -86,13 +99,5 @@ public class AiWebSocketClient extends WebSocketClient {
 
         Component npcMsg = mm.deserialize("<gold>[NPC]</gold> <white>" + response.getMessage() + "</white>");
         Bukkit.getServer().broadcast(npcMsg);
-
-        // Command execution stub (will be fully implemented in Sprint 4)
-        if (response.getCommands() != null && !response.getCommands().isEmpty()) {
-            for (String cmd : response.getCommands()) {
-                plugin.getLogger().info("Executing command: " + cmd);
-                // Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-            }
-        }
     }
 }

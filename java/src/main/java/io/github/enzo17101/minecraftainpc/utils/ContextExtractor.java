@@ -1,14 +1,15 @@
 package io.github.enzo17101.minecraftainpc.utils;
 
-import io.github.enzo17101.minecraftainpc.dto.IncomingPayload;
-import io.github.enzo17101.minecraftainpc.dto.LocationData;
-import io.github.enzo17101.minecraftainpc.dto.NpcData;
-import io.github.enzo17101.minecraftainpc.dto.PlayerData;
-import io.github.enzo17101.minecraftainpc.dto.WorldData;
+import io.github.enzo17101.minecraftainpc.dto.*;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContextExtractor {
     /**
@@ -24,20 +25,24 @@ public class ContextExtractor {
                 .weather(world.hasStorm() ? "STORM" : "CLEAR")
                 .build();
 
+        AttributeInstance maxHealthAttr = player.getAttribute(Attribute.MAX_HEALTH);
+        double maxHealth = (maxHealthAttr != null) ? maxHealthAttr.getValue() : 20.0;
+
         PlayerData playerData = PlayerData.builder()
                 .playerUuid(player.getUniqueId().toString())
                 .playerName(player.getName())
                 .message(message)
                 .heldItem(player.getInventory().getItemInMainHand().getType().name())
                 .playerHealth(player.getHealth())
-                .economyBalance(0.0) // TODO: Integrate Vault API for real economy tracking
+                .playerMaxHealth(maxHealth)
+                .economyBalance(0.0)
                 .build();
 
-        double npcHealth = (npc instanceof LivingEntity) ? ((LivingEntity) npc).getHealth() : 20.0;
+        double npcHealth = (npc instanceof LivingEntity livingEntity) ? livingEntity.getHealth() : 20.0;
 
         NpcData npcData = NpcData.builder()
                 .npcUuid(npc.getUniqueId().toString())
-                .npcName(!npc.getName().isEmpty() ? npc.getName() : npc.getType().name())
+                .npcName(npc.getName().isEmpty()? npc.getName() : npc.getType().name())
                 .npcHealth(npcHealth)
                 .npcLocation(LocationData.builder()
                         .x(npc.getLocation().getX())
@@ -46,10 +51,25 @@ public class ContextExtractor {
                         .build())
                 .build();
 
+        List<TradeItem> simulatedInventory = new ArrayList<>();
+        simulatedInventory.add(TradeItem.builder().item("apple").stock(18).price(6.0).build());
+
+        TradeCapability tradeCapability = TradeCapability.builder()
+                .isMerchant(true)
+                .inventory(simulatedInventory)
+                .build();
+
+        Capabilities capabilities = Capabilities.builder()
+                .availableQuests(new ArrayList<>())
+                .trade(tradeCapability)
+                .canAssist(false)
+                .build();
+
         return IncomingPayload.builder()
                 .world(worldData)
                 .player(playerData)
                 .npc(npcData)
+                .capabilities(capabilities)
                 .build();
     }
 }

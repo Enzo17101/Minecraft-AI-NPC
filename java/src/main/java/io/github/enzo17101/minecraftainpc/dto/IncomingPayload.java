@@ -9,4 +9,5 @@ public class IncomingPayload {
     private WorldData world;
     private PlayerData player;
     private NpcData npc;
+    private Capabilities capabilities;
 }
