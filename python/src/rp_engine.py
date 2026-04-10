@@ -1,7 +1,7 @@
 import logging
-from schemas import IncomingPayload
-from ai_engine import generate_cloud_response
-from intent_engine import IntentResult
+from src.schemas import IncomingPayload
+from src.ai_engine import generate_cloud_response
+from src.intent_engine import IntentResult
 
 logger = logging.getLogger(__name__)
 

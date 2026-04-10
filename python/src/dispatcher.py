@@ -1,8 +1,8 @@
 import logging
 from vllm.engine.async_llm_engine import AsyncLLMEngine
-from schemas import IncomingPayload, OutgoingPayload
-from intent_engine import detect_intent
-from rp_engine import generate_npc_dialogue
+from src.schemas import IncomingPayload, OutgoingPayload
+from src.intent_engine import detect_intent
+from src.rp_engine import generate_npc_dialogue
 
 logger = logging.getLogger(__name__)
 
