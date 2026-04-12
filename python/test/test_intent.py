@@ -1,8 +1,8 @@
 import asyncio
 import logging
 import time
-from ai_engine import init_vllm_engine
-from intent_engine import detect_intent
+from src.core.ai_engine import init_vllm_engine
+from src.services.intent_engine import detect_intent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

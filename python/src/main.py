@@ -4,10 +4,11 @@ from pydantic import ValidationError
 import logging
 import os
 
-from src.schemas import IncomingPayload, OutgoingPayload
-from src.connection_manager import ConnectionManager
-from src.ai_engine import init_vllm_engine
-from src.dispatcher import process_interaction
+from src.models.schemas import IncomingPayload, OutgoingPayload
+from src.api.connection_manager import ConnectionManager
+from src.core.ai_engine import init_vllm_engine
+from src.services.dispatcher import process_interaction
+from src.services.memory_manager import MemoryManager
 
 from dotenv import load_dotenv
 
@@ -23,16 +24,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 engine = None
+memory_manager = None
 manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine
+    global engine, memory_manager
     logger.info("Initializing Local LLM Engine (vLLM)...")
     engine = init_vllm_engine()
     logger.info("Local LLM Engine ready.")
+
+    logger.info("Connecting to Redis Memory Manager...")
+    memory_manager = MemoryManager()
+
     yield
-    logger.info("Shutting down Local LLM Engine...")
+    logger.info("Shutting down services...")
+    await memory_manager.close()
 
 app = FastAPI(
     title="Minecraft NPC AI Orchestrator",
@@ -58,12 +65,19 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                 incoming = IncomingPayload.model_validate_json(raw_data)
                 logger.info(f"[INCOMING PAYLOAD] {incoming}")
                 logger.info(f"Received message from {incoming.player.player_name} to {incoming.npc.npc_name}")
+
                 
+                if not memory_manager:
+                    raise RuntimeError("Critical: Memory Manager is not initialized.")
+                    
                 # Offload processing to the local intent engine and cloud roleplay model
-                outgoing = await process_interaction(engine, incoming)
+                outgoing = await process_interaction(engine, memory_manager, incoming)
                 
                 # Preserve the original player UUID for accurate Java server routing
                 outgoing.target_player_uuid = incoming.player.player_uuid
+
+                # Pass the memory manager to the dispatcher
+                outgoing = await process_interaction(engine, memory_manager, incoming)
                 
                 await manager.send_payload(outgoing.model_dump_json(), websocket)
                 

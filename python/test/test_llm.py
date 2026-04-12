@@ -2,7 +2,7 @@ import asyncio
 import logging
 from dotenv import load_dotenv
 from vllm.sampling_params import SamplingParams
-from ai_engine import generate_cloud_response, init_vllm_engine
+from src.core.ai_engine import generate_cloud_response, init_vllm_engine
 
 import time
 

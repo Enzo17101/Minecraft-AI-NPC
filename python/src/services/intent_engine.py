@@ -1,23 +1,11 @@
 import json
 import logging
 import uuid
-from typing import Optional
-from pydantic import BaseModel, Field
-from vllm.engine.async_llm_engine import AsyncLLMEngine
-from vllm.sampling_params import SamplingParams
-
+from typing import List, Dict, Optional
+from vllm import SamplingParams
+from src.models.schemas import IntentResult
 logger = logging.getLogger(__name__)
 
-class IntentResult(BaseModel):
-    """
-    Data transfer object mapping the local LLM JSON output to Python types.
-    Represents the mathematical classification of a player's interaction.
-    """
-    intent: str = Field(description="The detected intent from the taxonomy")
-    extracted_target: Optional[str] = Field(
-        default=None, 
-        description="Specific item, quest, or subject the player mentioned, if applicable"
-    )
 
 INTENT_SYSTEM_PROMPT = """You are a strictly logical JSON parsing engine for a Minecraft NPC.
 Your ONLY job is to categorize the player's interaction based on these strict definitions:
@@ -37,22 +25,32 @@ Example of expected format:
 
 DO NOT output any conversational text. DO NOT output markdown code blocks. Just the raw JSON object."""
 
-async def detect_intent(engine: AsyncLLMEngine, event_type: str, message: Optional[str]) -> IntentResult:
+async def detect_intent(engine, event_type: str, user_message: str | None, history: List[Dict[str, str]]) -> IntentResult:
     """
     Evaluates the context of a player interaction using the local LLM to extract a strict actionable intent.
     Bypasses the LLM entirely for pure physical interactions to guarantee zero latency.
     """
-    if event_type == "RIGHT_CLICK" and not message:
+    if event_type == "RIGHT_CLICK" and not user_message:
         return IntentResult(intent="CHAT_ONLY")
         
-    safe_message = message or ""
+    last_npc_message = ""
+    for msg in reversed(history):
+        if msg["role"] == "assistant":
+            last_npc_message = msg["content"]
+            break
+
+    context_prompt = ""
+    if last_npc_message:
+        context_prompt = f"Previous NPC statement: '{last_npc_message}'\n"
+
+    user_prompt = f"{context_prompt}Player says: '{user_message}'"
 
     prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 {INTENT_SYSTEM_PROMPT}<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 Event: {event_type}
-Message: {safe_message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Message: {user_prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
 {{"""
 

@@ -1,7 +1,8 @@
 import logging
-from src.schemas import IncomingPayload
-from src.ai_engine import generate_cloud_response
-from src.intent_engine import IntentResult
+from typing import List, Dict
+from src.models.schemas import IncomingPayload
+from src.core.ai_engine import generate_cloud_response
+from src.services.intent_engine import IntentResult
 
 logger = logging.getLogger(__name__)
 
@@ -93,11 +94,26 @@ def build_context_paragraph(payload: IncomingPayload, intent: IntentResult) -> s
         
     return context
 
-async def generate_npc_dialogue(payload: IncomingPayload, intent: IntentResult) -> str:
+def format_conversation_history(history: List[Dict[str, str]], npc_name: str) -> str:
+    """
+    Transforms the raw Redis dictionary list into a readable transcript for the LLM.
+    """
+    if not history:
+        return ""
+        
+    transcript = "[Recent Conversation History]\n"
+    for msg in history:
+        speaker = "Player" if msg["role"] == "user" else npc_name
+        transcript += f"{speaker}: {msg['content']}\n"
+        
+    return transcript + "\n"
+
+async def generate_npc_dialogue(payload: IncomingPayload, intent: 'IntentResult', history: List[Dict[str, str]]) -> str:
     """
     Constructs the final prompt and calls the Cloud LLM to generate spoken dialogue.
     """
     context_notes = build_context_paragraph(payload, intent)
+    history_transcript = format_conversation_history(history, payload.npc.npc_name)
     
     system_prompt = f"""{NPC_PERSONA}
 
@@ -109,8 +125,10 @@ Strict Rules:
 """
 
     user_message = payload.player.message if payload.player.message else "*Approaches silently*"
-    user_prompt = f"{context_notes}\n\nPlayer says: \"{user_message}\""
-    
+    # Inject the history right before the new player message
+    user_prompt = f"{context_notes}\n\n{history_transcript}Player says: \"{user_message}\""
+
+
     logger.info(f"Generating Roleplay response for {payload.player.player_name} via Cloud LLM...")
     response_text = await generate_cloud_response(system_prompt, user_prompt)
     

@@ -1,15 +1,15 @@
 import asyncio
 import logging
-from schemas import IncomingPayload, WorldData, PlayerData, NPCData, LocationData, Capabilities, TradeCapability, TradeItem
-from intent_engine import IntentResult
-from rp_engine import generate_npc_dialogue
+from models.schemas import IncomingPayload, WorldData, PlayerData, NPCData, LocationData, Capabilities, TradeCapability, TradeItem
+from src.services.intent_engine import IntentResult
+from src.services.rp_engine import generate_npc_dialogue
+import os
 from dotenv import load_dotenv
 
 # Load .env variables (MODEL_API_KEY, HF_TOKEN)
 load_dotenv()
 
 # Mute noisy loggers
-import os
 os.environ["VLLM_LOGGING_LEVEL"] = "WARNING"
 os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
 logging.getLogger("httpx").setLevel(logging.WARNING)

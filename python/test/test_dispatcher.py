@@ -1,9 +1,9 @@
 import asyncio
 import logging
 import os
-from ai_engine import init_vllm_engine
-from dispatcher import process_interaction
-from schemas import (
+from src.core.ai_engine import init_vllm_engine
+from src.services.dispatcher import process_interaction
+from models.schemas import (
     IncomingPayload, WorldData, PlayerData, LocationData, NPCData,
     Capabilities, TradeCapability, TradeItem
 )
