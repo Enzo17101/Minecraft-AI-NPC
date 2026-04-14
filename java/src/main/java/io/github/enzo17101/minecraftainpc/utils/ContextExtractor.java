@@ -51,12 +51,12 @@ public class ContextExtractor {
         Capabilities npcCapabilities = Capabilities.builder()
                 .availableQuests(new ArrayList<>())
                 .trade(tradeCapability)
-                .canAssist(false)
+                .canAssist(true)
                 .build();
 
         NpcData npcData = NpcData.builder()
                 .npcUuid(npc.getUniqueId().toString())
-                .npcName(npc.getName().isEmpty()? npc.getName() : npc.getType().name())
+                .npcName(npc.getName())
                 .npcHealth(npcHealth)
                 .npcLocation(LocationData.builder()
                         .x(npc.getLocation().getX())

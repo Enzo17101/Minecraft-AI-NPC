@@ -4,8 +4,7 @@ import io.github.enzo17101.minecraftainpc.dto.OutgoingPayload;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
 
@@ -16,6 +15,8 @@ public class ActionDispatcher {
             Bukkit.getLogger().warning("[AI] No target player UUID provided in the payload.");
             return;
         }
+
+        Bukkit.getLogger().info("[PAYLOAD]" + payload);
 
         Player player = Bukkit.getPlayer(UUID.fromString(payload.getTargetPlayerUuid()));
         if (player == null || !player.isOnline()) {
@@ -29,10 +30,13 @@ public class ActionDispatcher {
 
         // Executes all commands mapped by the Python backend securely via the server console
         if (payload.getCommands() != null && !payload.getCommands().isEmpty()) {
+
+            JavaPlugin pluginInstance = JavaPlugin.getProvidingPlugin(ActionDispatcher.class);
+
             for (String rawCommand : payload.getCommands()) {
                 Bukkit.getScheduler().runTask(
-                    Bukkit.getPluginManager().getPlugin("MinecraftAINPC"),
-                    () -> {
+                        pluginInstance,
+                        () -> {
                         // Check if the command should be forced as the player
                         if (rawCommand.startsWith("[PLAYER] ")) {
                             String cmd = rawCommand.replace("[PLAYER] ", "");

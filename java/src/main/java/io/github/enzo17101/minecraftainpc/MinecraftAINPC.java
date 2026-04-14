@@ -17,6 +17,7 @@ public class MinecraftAINPC extends JavaPlugin {
     public void onEnable() {
         getLogger().info("Initializing AI NPC Orchestrator...");
         connectToBackend("ws://localhost:8000/ws/chat");
+        startConnectionWatchdog();
 
         // Register Command and Listeners
         if (getCommand("talk") != null) {
@@ -58,6 +59,19 @@ public class MinecraftAINPC extends JavaPlugin {
         } catch (URISyntaxException e) {
             getLogger().severe("Invalid WebSocket URI formatting.");
         }
+    }
+
+    private void startConnectionWatchdog() {
+        // Runs an asynchronous background task every 10 seconds to monitor the connection state
+        // 200 ticks = 10 seconds
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+
+            if (webSocketClient == null || webSocketClient.isClosed()) {
+                getLogger().warning("[AI Watchdog] Connection to Python backend lost. Attempting to reconnect...");
+                connectToBackend("ws://localhost:8000/ws/chat");
+            }
+
+        }, 200L, 200L);
     }
 
     public AiWebSocketClient getWebSocketClient() {

@@ -45,8 +45,7 @@ public class AiWebSocketClient extends WebSocketClient {
             // Dispatch the logic back to the Bukkit Main Thread to safely interact with the game
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if ("ERROR".equals(response.getStatus())) {
-                    plugin.getLogger().warning("[AI Backend Error] " + response.getMessage());
-                    return;
+                    plugin.getLogger().warning("[Unknown AI Backend Error]");
                 }
 
                 ActionDispatcher.dispatch(response);

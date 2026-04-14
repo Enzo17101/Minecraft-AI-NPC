@@ -32,7 +32,7 @@ manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine, memory_manager
+    global engine, profile_manager, memory_manager
 
     start_time = time.time()
 
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Minecraft NPC AI Orchestrator",
     description="Backend API for asynchronous AI NPC management via WebSockets",
-    version="1.0.5",
+    version="1.0.6",
     lifespan=lifespan
 )
 
@@ -81,15 +81,15 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                 
                 if not memory_manager:
                     raise RuntimeError("Critical: Memory Manager is not initialized.")
+
+                if not profile_manager:
+                    raise RuntimeError("Critical: Profile Manager is not initialized.")
                     
                 # Offload processing to the local intent engine and cloud roleplay model
                 outgoing = await process_interaction(engine, memory_manager, profile_manager, incoming)
                 
                 # Preserve the original player UUID for accurate Java server routing
                 outgoing.target_player_uuid = incoming.player.player_uuid
-
-                # Pass the memory manager to the dispatcher
-                outgoing = await process_interaction(engine, memory_manager, profile_manager, incoming)
                 
                 await manager.send_payload(outgoing.model_dump_json(), websocket)
                 

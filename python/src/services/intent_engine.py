@@ -1,7 +1,7 @@
 import json
 import logging
 import uuid
-from typing import List, Dict, Optional
+from typing import List, Dict
 from vllm import SamplingParams
 from src.models.schemas import IntentResult
 logger = logging.getLogger(__name__)

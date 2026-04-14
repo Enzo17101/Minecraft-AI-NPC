@@ -26,10 +26,15 @@ async def process_interaction(engine,
         intent_result = await detect_intent(engine, payload.world.event_type, payload.player.message, history)
         dialogue = await generate_npc_dialogue(payload, intent_result, history)
 
-        if intent_result != "TALK_ONLY":
-            # Uses the NPC's name (lowercase) to match the YAML file name (e.g., 'eldon.yaml')
+        if intent_result.intent != "CHAT_ONLY":
+            # The npc_name sent by Java MUST match the YAML file name. 
+            # If Java sends 'VILLAGER', this will look for 'villager.yaml'
             npc_id = payload.npc.npc_name.lower()
             mapped_commands = profiles.get_action_commands(npc_id, intent_result.intent, payload.player.player_name)
+            
+            # Debug log to help you track if the profile was found
+            if not mapped_commands:
+                logger.warning(f"No commands found for NPC '{npc_id}' and intent '{intent_result.intent}'. Check if {npc_id}.yaml exists.")
         else:
             mapped_commands = []
         
