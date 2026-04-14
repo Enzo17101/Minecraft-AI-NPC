@@ -93,6 +93,10 @@ class OutgoingPayload(BaseModel):
         default=None, 
         description="Used by the Java server to route the response to the correct player"
     )
+    npc_name: Optional[str] = Field(
+        default="NPC",
+        description="The display name of the entity currently speaking"
+    )
     status: str = Field(
         default="SUCCESS", 
         description="'SUCCESS' or 'ERROR' based on pipeline execution"
@@ -101,4 +105,8 @@ class OutgoingPayload(BaseModel):
     action_intent: Optional[str] = Field(
         default=None, 
         description="The declarative action code intercepted by the Java rules engine"
+    )
+    commands: List[str] = Field(
+        default_factory=list,
+        description="Raw Minecraft console commands mapped to the intent"
     )

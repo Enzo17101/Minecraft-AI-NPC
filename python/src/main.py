@@ -3,12 +3,14 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 import logging
 import os
+import time
 
 from src.models.schemas import IncomingPayload, OutgoingPayload
 from src.api.connection_manager import ConnectionManager
 from src.core.ai_engine import init_vllm_engine
 from src.services.dispatcher import process_interaction
 from src.services.memory_manager import MemoryManager
+from src.services.profile_manager import ProfileManager
 
 from dotenv import load_dotenv
 
@@ -25,11 +27,15 @@ logger = logging.getLogger(__name__)
 
 engine = None
 memory_manager = None
+profile_manager = None
 manager = ConnectionManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global engine, memory_manager
+
+    start_time = time.time()
+
     logger.info("Initializing Local LLM Engine (vLLM)...")
     engine = init_vllm_engine()
     logger.info("Local LLM Engine ready.")
@@ -37,6 +43,12 @@ async def lifespan(app: FastAPI):
     logger.info("Connecting to Redis Memory Manager...")
     memory_manager = MemoryManager()
 
+    logger.info("Loading NPC profiles...")
+    profile_manager = ProfileManager(profiles_dir = "npc_profiles")
+
+    startup_duration = time.time() - start_time
+    logger.info(f"Backend started successfully in {startup_duration:.2f} seconds.")
+    
     yield
     logger.info("Shutting down services...")
     await memory_manager.close()
@@ -71,13 +83,13 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                     raise RuntimeError("Critical: Memory Manager is not initialized.")
                     
                 # Offload processing to the local intent engine and cloud roleplay model
-                outgoing = await process_interaction(engine, memory_manager, incoming)
+                outgoing = await process_interaction(engine, memory_manager, profile_manager, incoming)
                 
                 # Preserve the original player UUID for accurate Java server routing
                 outgoing.target_player_uuid = incoming.player.player_uuid
 
                 # Pass the memory manager to the dispatcher
-                outgoing = await process_interaction(engine, memory_manager, incoming)
+                outgoing = await process_interaction(engine, memory_manager, profile_manager, incoming)
                 
                 await manager.send_payload(outgoing.model_dump_json(), websocket)
                 
@@ -86,6 +98,7 @@ async def websocket_chat_endpoint(websocket: WebSocket):
                 
                 error_payload = OutgoingPayload(
                     status="ERROR",
+                    npc_name=None,
                     target_player_uuid=None,
                     message="[System] Invalid JSON payload.",
                     action_intent=None

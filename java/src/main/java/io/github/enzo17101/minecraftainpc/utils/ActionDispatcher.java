@@ -24,27 +24,28 @@ public class ActionDispatcher {
 
         MiniMessage mm = MiniMessage.miniMessage();
 
-        player.sendMessage(mm.deserialize("<gold>[Eldon]</gold> <white>" + payload.getMessage() + "</white>"));
+        String npcDisplayName = payload.getNpcName() != null ? payload.getNpcName() : "???";
+        player.sendMessage(mm.deserialize("<gold>[" + npcDisplayName + "]</gold> <white>" + payload.getMessage() + "</white>"));
 
-        String intent = payload.getActionIntent() != null ? payload.getActionIntent() : "CHAT_ONLY";
-
-        switch (intent) {
-            case "TRIGGER_ASSISTANCE":
-                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1));
-                player.sendMessage(mm.deserialize("<gray><i>Vous ressentez une chaleur apaisante...</i></gray>"));
-                break;
-
-            case "TRIGGER_TRADE":
-                player.sendMessage(mm.deserialize("<yellow>[Système] Ouverture de l'inventaire du marchand...</yellow>"));
-                break;
-
-            case "TRIGGER_QUEST":
-                player.sendMessage(mm.deserialize("<aqua>[Système] Redirection vers Typewriter...</aqua>"));
-                break;
-
-            case "CHAT_ONLY":
-            default:
-                break;
+        // Executes all commands mapped by the Python backend securely via the server console
+        if (payload.getCommands() != null && !payload.getCommands().isEmpty()) {
+            for (String rawCommand : payload.getCommands()) {
+                Bukkit.getScheduler().runTask(
+                    Bukkit.getPluginManager().getPlugin("MinecraftAINPC"),
+                    () -> {
+                        // Check if the command should be forced as the player
+                        if (rawCommand.startsWith("[PLAYER] ")) {
+                            String cmd = rawCommand.replace("[PLAYER] ", "");
+                            // The player silently executes the command themselves
+                            player.performCommand(cmd);
+                        } else {
+                            // Default to Console execution, stripping the tag if explicitly provided
+                            String cmd = rawCommand.replace("[CONSOLE] ", "");
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                        }
+                    }
+                );
+            }
         }
     }
 }

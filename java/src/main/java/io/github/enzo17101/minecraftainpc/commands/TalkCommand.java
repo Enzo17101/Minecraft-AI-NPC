@@ -38,7 +38,7 @@ public class TalkCommand implements CommandExecutor {
         // Find the nearest AI NPC to act as the target of this message
         // Search radius: 10 blocks
         Entity targetNpc = player.getNearbyEntities(10, 10, 10).stream()
-                .filter(e -> e.getName() != null && e.getName().contains("Eldon"))
+                .filter(e -> !e.getName().isEmpty() && e.getName().contains("Eldon"))
                 .min(Comparator.comparingDouble(e -> e.getLocation().distanceSquared(player.getLocation())))
                 .orElse(null);
 

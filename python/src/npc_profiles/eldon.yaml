@@ -1,0 +1,18 @@
+# npc_profiles/eldon.yaml
+name: "Eldon"
+actions:
+  TRIGGER_ASSISTANCE:
+    # Vanilla commands can be safely executed by the server console
+    - '[CONSOLE] effect give {player} minecraft:regeneration 10 1'
+    - '[CONSOLE] playsound minecraft:entity.experience_orb.pickup master {player}'
+    - '[CONSOLE] tellraw {player} {"text":"* You feel a soothing warmth spreading through your body... *","color":"gray","italic":true}'
+    
+  TRIGGER_TRADE:
+    - '[CONSOLE] tellraw {player} {"text":"* Eldon opens his heavy merchant satchel... *","color":"yellow","italic":true}'
+    # GUI plugins often require the player to execute the command to open the inventory window
+    - '[PLAYER] shop open eldon_shop'
+    
+  TRIGGER_QUEST:
+    - '[CONSOLE] tellraw {player} {"text":"* Your adventure journal glows faintly... *","color":"aqua","italic":true}'
+    # Assuming Typewriter requires player execution to open its UI
+    - '[PLAYER] typewriter ui'
